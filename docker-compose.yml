@@ -1,0 +1,74 @@
+name: code-container
+
+
+code-base:
+  build:
+  context: ./docker/base
+  tags: 
+    - "localhost/code-container-base"
+code-release:
+  build:  
+  context: .
+  dockerfile: ./docker/release/Dockerfile
+  args:
+    - USER_ID=${USER_ID}
+    - USER_GROUP=${USER_GROUP}
+  tags: 
+    - "localhost/code-container-release"
+  additional_contexts:
+    code-container-base: code-base
+
+
+
+services:
+  caddy:
+    image: docker.io/caddy
+    container_name: caddy
+    ports: 
+      - "8080:80"
+      - "4430:443" 
+    volumes: 
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      code-service:
+        condition: service_healthy
+      obsidian:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:80 || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+        
+  code-service:
+    image: localhost/code-container-release
+    volumes:
+      - ./container-home/vscode:/home/dev/workspace:Z
+      - code-container-data:/home/dev/.local
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8080/ || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      
+  obsidian:
+    image: lscr.io/linuxserver/obsidian:1.12.7
+    container_name: obsidian
+    volumes:
+      - ./container-home/obsidian:/config/local-docs:Z
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:3000/ || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3 
+    environment:
+      - TZ=Europe/Lisbon
+    shm_size: "1gb"
+
+volumes:
+  code-container-data:
+  caddy-data:
+  caddy-config:

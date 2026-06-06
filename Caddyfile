@@ -1,0 +1,27 @@
+
+localhost {
+    respond "caddy is working"
+}
+
+(LAN_only) {
+    @not_local {
+        not remote_ip private_ranges
+    }
+    respond @not_local 403
+}
+
+code-container.localhost {
+  reverse_proxy code-service:8080
+  import LAN_only
+  log {
+        output file /data/caddy/code_access.log
+    }
+}
+
+obsidian.localhost {
+  reverse_proxy obsidian:3000
+  import LAN_only
+  log {
+        output file /data/caddy/obsidian_access.log
+  }
+}
