@@ -1,4 +1,4 @@
-.PHONY: restart up build purge create-folders
+.PHONY: restart up build purge create-folders build-code-container all
 
 IMAGE := pvgm/code-container:local
 USER_ID := $(shell id -u)
@@ -6,8 +6,13 @@ USER_GROUP := $(shell id -g)
 
 include Make/*.mk
 
-build:
-	podman compose build --build-arg USER_ID=${USER_ID} --build-arg USER_GROUP=${USER_GROUP}
+all: build up
+
+build-code-container:
+	cd code-container && $(MAKE)
+
+build: build-code-container
+	podman compose build  --build-arg USER_ID=${USER_ID} --build-arg USER_GROUP=${USER_GROUP}
 
 up: create-folders fix-perms-container build
 	podman compose up -d

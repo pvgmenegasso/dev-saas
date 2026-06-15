@@ -23,11 +23,14 @@ services:
       retries: 3
         
   code-service:
-    image: localhost/code-release
+    image: code-container 
+    build:
+      context: ./code-container
     volumes:
       - ./container-home/vscode:/home/dev/workspace:Z
     ports:
       - "8080:8080"
+
 
   obsidian:
     image: lscr.io/linuxserver/obsidian:1.12.7
