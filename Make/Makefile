@@ -1,3 +1,10 @@
+#================================================================================
+# 
+# 	"CANNED" RULES
+#
+# (A.K.A functions without parameters)
+# ------------------------------------------------------------------------------
+#
 define clone-master
 	$(shell if [ -f submodules.log ]; then \
 		git fetch origin master >> submodules.log && \
@@ -14,26 +21,19 @@ define update-submodules
 endef
 
 
-.PHONY: status fix-perms fix-perms-container 
+.PHONY: all status fix-perms fix-perms-container 
+
+all: ;
 
 # SHIT THAT CREATES FILES
-down.log:
-	podman compose down 2>/dev/null | tee --output-error=warn down.log
+down down.log:
+	podman compose down 2>/dev/null 1>>down.log
 
-clean.log: down.log
-	$(shell rm ${filelist} | tee --output-error=warn -a clean.log)
-	podman rm -a | tee --output-error=warn clean.log
-
-GNUmakefile: clean.log
-	echo ${filelist}
-	$(MAKE) --always-remake -p | tee --output-error=exit GNUmakefile.log
-	$(MAKE) -p 2>/dev/null | tee --output-error=warn -a GNUmakefile
-	$(MAKE) clean.log 2>/dev/null
-
+clean clean.log: down
+	rm $(wildcard *.log) | tee --output-error=warn -a clean.log
+	podman rm -a >>  clean.log
 
 # VIRTUAL SHIT BELOW
-listfile:=$(shell ls *.log)
-filelist=${listfile} GNUmakefile
 
 status:
 	$(call full-section, \

@@ -1,4 +1,4 @@
-include Make/*.mk
+include Make/Makefile
 .PHONY: all up code-container obsidian-containe create-folders restart purge 
 
 all: purge code-container obsidian-container
@@ -9,7 +9,7 @@ define submodule
 	git submodule set-branch --branch master $@
 	$(clone-master)
 	$(update-submodules)
-	cd $@ && $(MAKE) || 0
+	-cd $@ && $(MAKE)
 endef
 
 
@@ -41,4 +41,3 @@ purge: down clean
 	podman rm -af
 	podman system prune -af
 	podman system reset -f
-
