@@ -1,15 +1,23 @@
-.PHONY: restart up build purge create-folders
-
-IMAGE := pvgm/code-container:local
-USER_ID := $(shell id -u)
-USER_GROUP := $(shell id -g)
-
 include Make/*.mk
+.PHONY: all up code-container obsidian-containe create-folders restart purge 
 
-build:
-	podman compose build --build-arg USER_ID=${USER_ID} --build-arg USER_GROUP=${USER_GROUP}
+all: purge code-container obsidian-container
 
-up: create-folders fix-perms-container build
+# Checks out master, clone synch and build on directorie's make
+define submodule
+	@echo making submodule $@
+	git submodule set-branch --branch master $@
+	$(clone-master)
+	$(update-submodules)
+	cd $@ && $(MAKE) || 0
+endef
+
+
+code-container obsidian-container: create-folders
+	$(submodule)
+
+
+up: down code-container obsidian-container create-folders fix-perms-contaienr
 	podman compose up -d
 
 create-folders: container-home/obsidian container-home/vscode
@@ -22,7 +30,7 @@ container-home/vscode:
 
 restart: down up
 
-purge: clean down
+purge: down clean 
 	podman container rm -af 
 	podman volume rm -af
 	rm -rf container-home
