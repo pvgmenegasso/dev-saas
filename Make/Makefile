@@ -1,3 +1,4 @@
+include Make/printing.mk
 #================================================================================
 # 
 # 	"CANNED" RULES
@@ -21,13 +22,12 @@ define update-submodules
 endef
 
 
-.PHONY: all status fix-perms fix-perms-container 
+.PHONY: status fix-perms fix-perms-container 
 
-all: ;
 
 # SHIT THAT CREATES FILES
-down down.log:
-	podman compose down 2>/dev/null 1>>down.log
+down down.log: fix-perms
+	-podman compose down 2>/dev/null 1>>down.log
 
 clean clean.log: down
 	rm $(wildcard *.log) | tee --output-error=warn -a clean.log
@@ -35,30 +35,33 @@ clean clean.log: down
 
 # VIRTUAL SHIT BELOW
 
-status:
-	$(call full-section, \
-		"PRINTING INFOS ABOUT PODMAN from lowest to highest abstraction level",\
-		$(call section, \
-			"ARTIFACTS", \
-			"podman artifact ls") \
-		$(call section, \
-			"IMAGES", \
-			"podman images") \
-		$(call section, \
-			"CONTAINERS", \
-			"podman container list --all") \
-		$(call section, \
-			"PODS", \
-			"podman pod ps") \
-		$(call section, \
-			"COMPOSE", \
-			"podman compose ps 2>/dev/nulll") \
-	)
-
-
-
 fix-perms:
 	sudo chown -R ${USER_ID}:${USER_GROUP} container-home
 
 fix-perms-container:
 	podman unshare chown -R "${USER_ID}":"${USER_GROUP}" container-home
+
+# PRINTING 
+#
+
+define status-artifacts
+$(call section, "ARTIFACTS", podman artifact ls)
+endef
+define status-images
+$(call section, "IMAGES", podman images)
+endef
+define status-containers
+$(call section, "CONTAINERS", podman container list --all)
+endef
+define status-ṕods
+$(call section, "PODS", podman pod ps)
+endef
+define status-compose
+$(call section,"COMPOSE",podman compose ps 2>/dev/null)
+endef
+
+status:
+	$(call full-section, "PRINTING INFOS ABOUT PODMAN from lowest to highest abstraction level",$(status-artifacts) $(status-images) $(status-containers) $(status-pods) $(status-compose))
+
+
+

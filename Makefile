@@ -1,5 +1,9 @@
 include Make/Makefile
-.PHONY: all up code-container obsidian-containe create-folders restart purge 
+.PHONY: all up code-container obsidian-container create-folders restart purge 
+
+USER_ID := $(shell id -u)
+USER_GROUP := $(shell id -g)
+
 
 all: purge code-container obsidian-container
 
@@ -17,8 +21,9 @@ code-container obsidian-container: create-folders
 	$(submodule)
 
 
-up: down code-container obsidian-container create-folders fix-perms-contaienr
-	podman compose up -d
+up: down code-container obsidian-container create-folders fix-perms-container
+	podman compose up -d --build-arg USER_ID=${USER_ID} --build-arg USER_GROUP=${USER_GROUP}
+ 
 
 create-folders: container-home/obsidian container-home/vscode
 
@@ -30,10 +35,10 @@ container-home/vscode:
 
 restart: down up
 
-purge: down clean 
+purge: down clean	
 	podman container rm -af 
 	podman volume rm -af
-	rm -rf container-home
+	sudo rm -rf container-home
 	mkdir -p container-home/obsidian container-home/vscode
 	find container-home/obsidian -mindepth 1 -maxdepth 1 -exec rm -rf "{}" \; || true
 	find container-home/vscode -mindepth 1 -maxdepth 1 -exec rm -rf "{}" \; || true
