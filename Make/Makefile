@@ -6,28 +6,24 @@ include Make/printing.mk
 # (A.K.A functions without parameters)
 # ------------------------------------------------------------------------------
 #
+
+
 define clone-master
-	$(shell if [ -f submodules.log ]; then \
-		git fetch origin master >> submodules.log && \
-		git pull origin master >> submodules.log && \
-		git checkout master >> submodules.log; \
-	fi)
+	git fetch -a
+	git pull	
 endef
 
-define update-submodules
-	$(shell if [ -f submodules.log ]; then \
-		git submodule sync --recursive >> submodules.log && \
-		git submodule update --recursive >> submodules.log; \
-	fi)
+define update-submodules	
+	git submodule sync --recursive 
+	git submodule update --init --recursive 
 endef
 
 
-.PHONY: status fix-perms fix-perms-container 
-
+.PHONY: clean down status fix-perms fix-perms-container git-operations
 
 # SHIT THAT CREATES FILES
 down down.log: fix-perms
-	-podman compose down 2>/dev/null 1>>down.log
+	podman compose down 1&2>>down.log || true	
 
 clean clean.log: down
 	rm $(wildcard *.log) | tee --output-error=warn -a clean.log
