@@ -49,7 +49,7 @@ up: build fix-perms-container
 	# Save old log as bkp in logs/dev-saas.log.DATE.bkp	
 	mv "${LOGFILE}" logs/"${LOGFILE}"."$(date +%d%m%y)".bkp || true
 	podman compose up -d --build-arg USER_ID=${USER_ID} --build-arg USER_GROUP=${USER_GROUP}
-	podman compose logs -f | tee >> "${LOGFILE}"
+	podman compose logs -f | tee ${LOGFILE}
 
 restart: down fix-perms-container up
 

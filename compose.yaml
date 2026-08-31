@@ -21,17 +21,25 @@ services:
       interval: 30s
       timeout: 5s
       retries: 3
+    networks:
+      - virtual-bridge
         
   code-service:
     image: localhost/code-release
+    container_name: code-service
+    build:
+      context: ./code-container
     volumes:
       - ./container-home/vscode:/home/dev/workspace:Z
     healthcheck:
-      test: ["CMD-SHELL", "curl -fsSl http://localhost:8080/ || exit 1"]
+      test: ["CMD-SHELL", "curl -fsSl http://localhost:8000/ || exit 1"]
       interval: 30s
       timeout: 5s
       retries: 3
- 
+    networks:
+      - virtual-bridge
+     
+
   obsidian:
     image: lscr.io/linuxserver/obsidian:1.12.7
     container_name: obsidian
@@ -45,8 +53,14 @@ services:
     environment:
       - TZ=Europe/Lisbon
     shm_size: "1gb"
+    networks:
+      - virtual-bridge
+     
 
 volumes:
   code-container-data:
   caddy-data:
   caddy-config:
+
+networks:
+  virtual-bridge:
