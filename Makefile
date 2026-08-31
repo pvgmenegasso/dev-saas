@@ -17,7 +17,7 @@ define submodule
 	@echo making submodule $@
 	git submodule set-branch --branch master $@
 	$(call update-submodules)
-	cd $@ && $(call clone-master)
+	cd $@; $(call clone-master)
 endef
 
 
@@ -41,18 +41,22 @@ status:
 #						    	     ||
 #--------------------------------------------------------------||
 
-up: code-container obsidian-container fix-perms-container
+build: code-container obsidian-container
+	podman compose build --build-arg USER_ID=${USER_ID} --build-arg USER_GROUP=${USER_GROUP}
+
+
+up: build fix-perms-container
 	# Save old log as bkp in logs/dev-saas.log.DATE.bkp	
-	mv ${LOGFILE} logs/${LOGFILE}.$(date +%d%m%y).bkp || true
+	mv "${LOGFILE}" logs/"${LOGFILE}"."$(date +%d%m%y)".bkp || true
 	podman compose up -d --build-arg USER_ID=${USER_ID} --build-arg USER_GROUP=${USER_GROUP}
-	podman logs -f | tee >> ${LOGFILE}
+	podman logs -f | tee >> "${LOGFILE}"
 
 restart: down fix-perms-container up
 
 stop: down fix-perms
 
 down down.log:
-	podman compose down 1&2>>down.log || true
+	podman compose down >> logs/down.log || true
 
 
 
@@ -64,7 +68,8 @@ down down.log:
 #--------------------------------------------------------------||
 
 code-container obsidian-container: create-folders
-	$(submodule)
+	$(call submodule)
+	cd $@ && $(MAKE) build || true
 
 fix-perms:
 	sudo chown -R ${USER_ID}:${USER_GROUP} container-home
@@ -88,8 +93,6 @@ clean clean.log: down
 purge: down clean	
 	podman container rm -af 
 	podman volume rm -af
-	sudo rm -rf container-home
-	mkdir -p container-home/obsidian container-home/vscode
 	find container-home/obsidian -mindepth 1 -maxdepth 1 -exec rm -rf "{}" \; || true
 	find container-home/vscode -mindepth 1 -maxdepth 1 -exec rm -rf "{}" \; || true
 	podman image rm -af
