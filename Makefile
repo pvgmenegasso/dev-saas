@@ -1,13 +1,11 @@
+include Make/Makefile
 .PHONY: all up code-container obsidian-container create-folders restart purge 
 
 USER_ID := $(shell id -u)
 USER_GROUP := $(shell id -g)
 
 
-all: up
-
-include Make/Makefile
-
+all: purge code-container obsidian-container
 
 # Checks out master, clone synch and build on directorie's make
 define submodule
@@ -15,16 +13,14 @@ define submodule
 	git submodule set-branch --branch master $@
 	$(call update-submodules)
 	cd $@ && $(call clone-master)
-	cd $@ && $(MAKE) || true 
 endef
 
 
 code-container obsidian-container: create-folders
-	$(call submodule)
+	$(submodule)
 
 
-
-up: code-container obsidian-container fix-perms-container
+up: down code-container obsidian-container create-folders fix-perms-container
 	podman compose up -d --build-arg USER_ID=${USER_ID} --build-arg USER_GROUP=${USER_GROUP}
  
 
