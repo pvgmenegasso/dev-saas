@@ -31,6 +31,7 @@ services:
       context: ./code-container
     volumes:
       - ./container-home/vscode:/home/dev/workspace:Z
+      - :/home/dev
     healthcheck:
       test: ["CMD-SHELL", "curl -fsSl http://localhost:8000/ || exit 1"]
       interval: 30s
