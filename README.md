@@ -15,9 +15,9 @@ Building the project and launching the containers is as simple as going to the r
 
 ## Accessing the applications
 After successfull build, you can use the applications locally on the following urls:  
-    - [code-container](https://code-container.localhost:4300)  
-    - [obsdiain](https://obsidian.localhost:4300)  
-    - [caddy](https://caddy.localhost:4300)  
+    - [code-container](https://code-container.localhost:4430)  
+    - [obsdiain](https://obsidian.localhost:4430)  
+    - [caddy](https://caddy.localhost:4430)  
 
 
 ### Additional information:

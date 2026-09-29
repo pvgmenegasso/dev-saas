@@ -1,6 +1,8 @@
 [submodule "obsidian-container"]
 	path = obsidian-container
 	url = git@github.com:pvgmenegasso/obsidian-container.git
+	branch = master
 [submodule "code-container"]
 	path = code-container
 	url = git@github.com:pvgmenegasso/code-container.git
+	branch = master
