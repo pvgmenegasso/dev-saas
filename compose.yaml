@@ -23,12 +23,22 @@ services:
       retries: 3
     networks:
       - virtual-bridge
-        
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 500MB
+
+  
+
+
   code-service:
     image: localhost/code-release
     container_name: code-service
     build:
       context: ./code-container
+    ports:
+      - "5000:5000"
     volumes:
       - ./container-home/vscode:/home/dev/workspace:Z
       - :/home/dev
@@ -39,7 +49,14 @@ services:
       retries: 3
     networks:
       - virtual-bridge
-     
+    deploy:
+      resources:
+        limits:
+          cpus: '4'
+          memory: 4GB
+        reservations:
+          cpus: '2'
+          memory: 1GB
 
   obsidian:
     image: lscr.io/linuxserver/obsidian:1.12.7
@@ -56,6 +73,12 @@ services:
     shm_size: "1gb"
     networks:
       - virtual-bridge
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 1Gb
+
      
 
 volumes:
