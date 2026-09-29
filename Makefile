@@ -98,3 +98,5 @@ purge: down clean
 	podman rm -af
 	podman system prune -af
 	podman system reset -f
+	# Let's also take a minute to clean git
+	git gc
