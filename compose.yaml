@@ -5,7 +5,7 @@ services:
     image: docker.io/caddy
     container_name: caddy
     ports: 
-      - "8080:8080"
+      - "8080:8000"
       - "4430:443" 
     volumes: 
       - ./Caddyfile:/etc/caddy/Caddyfile:ro
@@ -37,8 +37,6 @@ services:
     container_name: code-service
     build:
       context: ./code-container
-    ports:
-      - "5000:5000"
     volumes:
       - ./container-home/vscode:/home/dev/workspace:Z
       - :/home/dev
